@@ -1,0 +1,36 @@
+﻿<UserControl x:Class="Ratatoskr.App.Views.Customers.CustomerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vm="clr-namespace:Ratatoskr.App.ViewModels.Customers"
+             mc:Ignorable="d">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <!--Eingabefelder-->
+        <StackPanel>
+            <Button Content="➕ Neuer Kunde"
+                    Command="{Binding AddCustomerCommand}"
+                    Margin="0 0 10 0"/>
+            <Button Content="🔄 Neu laden"
+                    Command="{Binding LoadCustomersCommand}"
+                    Margin="0 0 10 0"/>
+            <Button Content="Löschvermerk"
+                    Command="{Binding DeleteCustomerCommand}"
+                    Margin="0 0 10 0"/>
+            <Button Content="Bearbeiten"
+                    Command="{Binding EditCustomerCommand}"
+                    Margin="0 0 10 0"/>
+        </StackPanel>
+        <!--Kundenliste-->
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Customers}"
+                      AutoGenerateColumns="True"
+                  IsReadOnly="True"
+                  SelectedItem="{Binding SelectedCustomer, Mode=TwoWay}"
+                      Margin="0 10 0 0"/>
+    </Grid>
+</UserControl>

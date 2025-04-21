@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using Ratatoskr.App.Helpers;
+using Ratatoskr.App.Views.Customers;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -9,7 +11,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Ratatoskr.ERP
+namespace Ratatoskr.App
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -19,6 +21,8 @@ namespace Ratatoskr.ERP
         public MainWindow()
         {
             InitializeComponent();
+
+            MainContent.Content = ViewLoader.LoadView<CustomerView>();
         }
     }
 }
