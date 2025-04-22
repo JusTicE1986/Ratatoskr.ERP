@@ -3,10 +3,29 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avalonDock="https://github.com/Dirkster99/AvalonDock"
         xmlns:local="clr-namespace:Ratatoskr.App"
         mc:Ignorable="d"
-        Title="Ratatoskr" Height="600" Width="1000">
-    <Grid>
-        <ContentControl x:Name="MainContent"/>
-    </Grid>
+        Title="Ratatoskr" Height="800" Width="1200"
+        WindowStartupLocation="CenterScreen">
+
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Datei">
+                <MenuItem Header="Beenden" Click="Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Ansichten">
+                <MenuItem Header="Kunden" Click="OpenCustomerView_Click"/>
+                <MenuItem Header="Leistungen" Click="OpenServiceView_Click"/>
+            </MenuItem>
+        </Menu>
+        <avalonDock:DockingManager x:Name="DockManager">
+            <avalonDock:LayoutRoot>
+                <avalonDock:LayoutPanel>
+                    <avalonDock:LayoutDocumentPane x:Name="MainDocumentPane"/>
+                </avalonDock:LayoutPanel>
+            </avalonDock:LayoutRoot>
+        </avalonDock:DockingManager>
+    </DockPanel>
+    
 </Window>

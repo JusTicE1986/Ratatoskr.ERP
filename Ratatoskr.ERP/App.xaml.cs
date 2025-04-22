@@ -3,7 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Ratatoskr.App.ViewModels.Customers;
+using Ratatoskr.App.ViewModels.Services;
 using Ratatoskr.App.Views.Customers;
+using Ratatoskr.App.Views.Services;
 using Ratatoskr.Infrastructure.Database;
 using Ratatoskr.Infrastructure.Services;
 using System.Configuration;
@@ -40,6 +42,9 @@ public partial class App : Application
                 services.AddTransient<CustomerService>();
                 services.AddTransient<CustomerViewModel>();
                 services.AddTransient<CustomerView>();
+
+                services.AddTransient<ServiceManagementView>();
+                services.AddTransient<ServiceManagementViewModel>();
             })
             .Build();
     }
