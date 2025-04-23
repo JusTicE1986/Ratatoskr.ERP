@@ -43,7 +43,7 @@ public partial class App : Application
                 options.UseSqlite($"Data Source={dbPath}"));
 
                 services.AddTransient<CustomerService>();
-                services.AddTransient<CustomerViewModel>();
+                services.AddTransient<CustomersViewModel>();
                 services.AddTransient<CustomerView>();
 
                 services.AddTransient<ServiceManagementView>();

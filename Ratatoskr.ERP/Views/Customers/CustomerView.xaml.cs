@@ -12,7 +12,7 @@ namespace Ratatoskr.App.Views.Customers
         public CustomerView()
         {
             InitializeComponent();
-            DataContext = App.AppHost.Services.GetRequiredService<CustomerViewModel>();
+            DataContext = App.AppHost.Services.GetRequiredService<CustomersViewModel>();
         }
     }
 }

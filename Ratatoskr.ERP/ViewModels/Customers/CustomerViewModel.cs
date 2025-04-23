@@ -1,104 +1,103 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Ratatoskr.App.View.Customers;
 using Ratatoskr.Core.Models;
 using Ratatoskr.Infrastructure.Services;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace Ratatoskr.App.ViewModels.Customers;
 
-public partial class CustomerViewModel : ObservableObject
+public partial class CustomersViewModel : ObservableObject
 {
     private readonly CustomerService _service;
 
-    private bool CanDeleteCustomer() => SelectedCustomer is not null;
-    private bool CanEditCustomer() => SelectedCustomer is not null;
+    public CustomersViewModel(CustomerService service)
+    {
+        _service = service;
+        _ = LoadCustomersAsync();
+    }
+
+    private List<Customer> _allCustomers = new();
 
     [ObservableProperty]
     private ObservableCollection<Customer> customers = new();
+
     [ObservableProperty]
-    private Customer newCustomer = new();
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(EditCustomerCommand))]
     private Customer? selectedCustomer;
 
-    public CustomerViewModel(CustomerService service)
+    [ObservableProperty]
+    private string? nameFilter;
+
+    [ObservableProperty]
+    private string? companyFilter;
+
+    [ObservableProperty]
+    private bool isNewCustomerFormVisible = false;
+
+    [RelayCommand]
+    private async Task LoadCustomersAsync()
     {
-        _service = service;
-        LoadCustomers();
+        _allCustomers = (await _service.GetAllAsync()).Where(c => c.IsActive).ToList();
+        ApplyFilter();
     }
 
     [RelayCommand]
-    private async Task AddCustomer()
+    private void ApplyFilter()
     {
-        var dialog = new NewCustomerView();
-        if (dialog.ShowDialog() == true && dialog.CreatedCustomer is not null)
-        {
-            await _service.AddAsync(dialog.CreatedCustomer);
-            await LoadCustomers(); // oder deine Methode zum Reload
-        }
+        var query = _allCustomers.AsEnumerable();
 
+        if (!string.IsNullOrWhiteSpace(NameFilter))
+            query = query.Where(c => c.FullName.Contains(NameFilter, StringComparison.OrdinalIgnoreCase));
+
+        if (!string.IsNullOrWhiteSpace(CompanyFilter))
+            query = query.Where(c => (c.CompanyName ?? string.Empty).Contains(CompanyFilter, StringComparison.OrdinalIgnoreCase));
+
+        Customers = new ObservableCollection<Customer>(query);
     }
 
     [RelayCommand]
-    private async Task LoadCustomers()
+    private void ResetFilters()
     {
-        var list = await _service.GetAllAsync();
-        Customers = new ObservableCollection<Customer>(list.Where(c => c.IsActive));
+        NameFilter = null;
+        CompanyFilter = null;
+        ApplyFilter();
     }
 
     [RelayCommand]
-    private async Task DeleteCustomer(Customer customer)
+    private void ShowNewCustomerForm()
     {
-        if (SelectedCustomer is null)
-        {
-            MessageBox.Show("Kein Kunde ausgewählt."); 
-            return;
-        }
-        var result = MessageBox.Show($"Möchtest du wirklich den Kunden '{SelectedCustomer.Prename} {SelectedCustomer.Surname}' deaktivieren?\n\n" +
-            "Der Kunde kann nicht mehr verwendet werden.", "Löschvermerk setzen", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-
-        if (result != MessageBoxResult.Yes) return;
-        SelectedCustomer.IsActive = false;
-        await _service.UpdateAsync(SelectedCustomer);
-        await LoadCustomers();
+        SelectedCustomer = null;
+        IsNewCustomerFormVisible = true;
     }
 
     [RelayCommand(CanExecute = nameof(CanEditCustomer))]
-    private async Task EditCustomer()
+    private void EditCustomer()
+    {
+        if (SelectedCustomer is null) return;
+        IsNewCustomerFormVisible = true;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanEditCustomer))]
+    private async Task DeleteCustomerAsync()
     {
         if (SelectedCustomer is null) return;
 
-        //bool hasPastInvoices = await _invoiceService.HastPastInvoicesAsync(SelectedCustomer.Id);
-        bool hasLockedFields = false;
-
-        var customerToEdit = new Customer
-        {
-            Id = SelectedCustomer.Id,
-            Prename = SelectedCustomer.Prename,
-            Surname = SelectedCustomer.Surname,
-            Email = SelectedCustomer.Email,
-            Phone = SelectedCustomer.Phone,
-            Address = SelectedCustomer.Address,
-            ZipCode = SelectedCustomer.ZipCode,
-            City = SelectedCustomer.City,
-            Country = SelectedCustomer.Country,
-            IsActive = SelectedCustomer.IsActive
-        };
-
-        var dialog = new NewCustomerView(customerToEdit, isEditMode: true, hasLockedFields: hasLockedFields);
-        if (dialog.ShowDialog() == true && dialog.CreatedCustomer is not null)
-        {
-            await _service.UpdateAsync(dialog.CreatedCustomer);
-            await LoadCustomers();
-        }
+        SelectedCustomer.IsActive = false;
+        await _service.UpdateAsync(SelectedCustomer);
+        await LoadCustomersAsync();
     }
-    
+
+    public async Task SaveCustomerAsync(Customer customer, bool isEdit)
+    {
+        if (isEdit)
+            await _service.UpdateAsync(customer);
+        else
+            await _service.AddAsync(customer);
+
+        IsNewCustomerFormVisible = false;
+        await LoadCustomersAsync();
+    }
+
+    private bool CanEditCustomer() => SelectedCustomer is not null;
 }
