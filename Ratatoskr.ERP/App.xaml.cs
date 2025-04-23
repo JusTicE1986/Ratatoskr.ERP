@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Ratatoskr.App.Services;
 using Ratatoskr.App.ViewModels.Customers;
 using Ratatoskr.App.ViewModels.Invoices;
 using Ratatoskr.App.ViewModels.Services;
@@ -53,6 +54,8 @@ public partial class App : Application
 
                 services.AddTransient<InvoicesView>();
                 services.AddTransient<InvoicesViewModel>();
+
+                services.AddSingleton<InvoicePdfSerivce>();
             })
             .Build();
     }

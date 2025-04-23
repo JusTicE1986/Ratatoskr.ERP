@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
 using Ratatoskr.App.Messages;
+using Ratatoskr.App.Services;
 using Ratatoskr.Core.Enums;
 using Ratatoskr.Core.Models;
 using Ratatoskr.Infrastructure.Database;
@@ -19,10 +20,12 @@ namespace Ratatoskr.App.ViewModels.Invoices;
 public partial class InvoicesViewModel : ObservableObject
 {
     private readonly AppDbContext _db;
+    private readonly InvoicePdfSerivce _pdfService;
 
-    public InvoicesViewModel(AppDbContext db)
+    public InvoicesViewModel(AppDbContext db, InvoicePdfSerivce pdfSerivce)
     {
         _db = db;
+        _pdfService = pdfSerivce;
         _ = LoadInvoicesAsync();
 
         WeakReferenceMessenger.Default.Register<InvoiceSavedMessage>(this, async (r, m) =>
@@ -118,13 +121,16 @@ public partial class InvoicesViewModel : ObservableObject
         if (SelectedInvoice is null) return;
         bool isCopy = SelectedInvoice.Status != InvoiceStatus.Draft;
 
-        if (isCopy)
+        var invoice = await _db.Invoices
+            .Include(i => i.Customer)
+            .Include(i => i.Items)
+            .FirstAsync(i => i.Id == SelectedInvoice.Id);
+
+        _pdfService.GeneratePdf(invoice, isCopy);
+
+        if (!isCopy)
         {
-            MessageBox.Show($"Drucke **Kopie** von Rechnung {SelectedInvoice.InvoiceNumber}", "Hinweis", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-        }
-        else
-        {
-            MessageBox.Show($"Drucke **Original** von Rechnung {SelectedInvoice.InvoiceNumber}", "Hinweis", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            
             SelectedInvoice.Status = InvoiceStatus.Open;
             _db.Update(SelectedInvoice);
             await _db.SaveChangesAsync();
@@ -137,7 +143,11 @@ public partial class InvoicesViewModel : ObservableObject
     private async Task PrintCopy()
     {
         if (SelectedInvoice is null) return;
-        PrintInvoiceAsync();
+        var invoice = await _db.Invoices
+            .Include(i => i.Customer)
+            .Include(i => i.Items)
+            .FirstAsync(i => i.Id == SelectedInvoice.Id);
+        _pdfService.GeneratePdf(invoice, isCopy:true);
     }
 
     [RelayCommand]

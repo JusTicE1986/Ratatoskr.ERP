@@ -15,6 +15,9 @@ public partial class InvoiceItem : ObservableObject
     public Service? Service { get; set; }
 
     [ObservableProperty]
+    private int positionNumber;
+
+    [ObservableProperty]
     private string description = string.Empty;
 
     [ObservableProperty]

@@ -106,8 +106,10 @@ public partial class NewInvoiceViewModel : ObservableObject
         // Nimm den ersten Service als Standardauswahl
         var selectedService = Services.First();
 
+        var nextPosition = Items.Count + 1;
         var item = new InvoiceItem
         {
+            PositionNumber = nextPosition,
             ServiceId = selectedService.Id,
             Service = selectedService, // notwendig für OnServiceIdChanged
             Description = selectedService.Name,
