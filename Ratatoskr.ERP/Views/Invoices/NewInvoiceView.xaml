@@ -1,0 +1,78 @@
+﻿<UserControl x:Class="Ratatoskr.App.Views.Invoices.NewInvoiceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Ratatoskr.App.Views.Invoices"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Margin="0 0 0 10" Grid.Row="0">
+            <TextBlock Text="Kunde:" VerticalAlignment="Center" Width="60"/>
+            <ComboBox ItemsSource="{Binding Customers}"
+                      SelectedItem="{Binding SelectedCustomer}"
+                      DisplayMemberPath="FullName"
+                      Width="300"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0 0 0 10" Grid.Row="1">
+            <TextBlock Text="Rechnungsnummer: " VerticalAlignment="Center" Width="120"/>
+            <TextBox Text="{Binding InvoiceNumber}" IsReadOnly="True" Width="150" Margin="0 0 20 0"/>
+            <TextBlock Text="Datum:" VerticalAlignment="Center" Width="60"/>
+            <DatePicker SelectedDate="{Binding InvoiceDate}" Width="150"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Margin="0 0 0 10" Grid.Row="2">
+            <ComboBox ItemsSource="{Binding Services}"
+              SelectedItem="{Binding SelectedServiceToAdd}"
+              DisplayMemberPath="Name"
+              Width="200" Margin="0 10 10 0"/>
+            <TextBox Text="{Binding QuantityToAdd}" Width="60" Margin="0 10 10 0"/>
+            <Button Content="Position hinzufügen" 
+            Command="{Binding AddSelectedServiceToInvoiceCommand}" />
+            <Button Content="Markierte Position löschen"
+        Command="{Binding DeleteSelectedItemCommand}"
+                    Width="180" Margin="10 0 0 0"
+        IsEnabled="{Binding SelectedItem, Converter={StaticResource NullToBoolConverter}}"/>
+        
+        </StackPanel>
+        <DataGrid Grid.Row="3"
+          ItemsSource="{Binding Items}"
+          SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+          AutoGenerateColumns="False"
+          CanUserAddRows="False"
+          Margin="0 0 0 10"
+          IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Leistung" Binding="{Binding Description}" Width="*"/>
+                <DataGridTextColumn Header="Menge" Binding="{Binding Quantity}" Width="80"/>
+                <DataGridTextColumn Header="Einzelpreis" Binding="{Binding UnitPrice, StringFormat=N2}" Width="100"/>
+                <DataGridTextColumn Header="MwSt." Binding="{Binding VatRate, StringFormat=P0}" Width="80"/>
+                <DataGridTextColumn Header="Netto" Binding="{Binding NetTotal, StringFormat=N2}" Width="100"/>
+                <DataGridTextColumn Header="Brutto" Binding="{Binding GrossTotal, StringFormat=N2}" Width="100"/>
+            </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Text="Zwischensumme:" Margin="0 0 10 0" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding TotalNet, StringFormat=N2}" Width="100"/>
+                <TextBlock Text="MwSt.:" Margin="0 0 10 0" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding TotalVat, StringFormat=N2}" Width="100"/>
+                <TextBlock Text="Gesamt:" FontWeight="Bold" Margin="0 0 10 0" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding TotalGross, StringFormat=N2}" FontWeight="Bold" Width="100"/>
+            </StackPanel>
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0 20 0 0">
+            <Button Content="Position hinzufügen"
+                    Command="{Binding AddItemCommand}" Width="120" Margin="0 0 10 0"/>
+            <Button Content="Speichern"
+                    Command="{Binding SaveInvoiceCommand}" Width="120" Margin="0 0 10 0"/>
+
+        </StackPanel>
+
+    </Grid>
+</UserControl>

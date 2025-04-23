@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ratatoskr.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,9 +22,9 @@ public class Invoice
 
     public InvoiceStatus Status { get; set; } = InvoiceStatus.Draft;
 
-    public decimal TotalNet { get; set; } => Items.Sum(i => i.NetTotal);
-    public decimal TotalVat { get; set; } => Items.Sum(i => i.VatAmount);
-    public decimal TotalGross { get; set; } => TotalNet + TotalVat;
+    public decimal TotalNet { get; set; }
+    public decimal TotalVat { get; set; }
+    public decimal TotalGross { get; set; }
 
     public string Notes { get; set; } = string.Empty;
 }

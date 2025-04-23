@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
+using Ratatoskr.Core.Enums;
 using Ratatoskr.Core.Models;
 using Ratatoskr.Infrastructure.Database;
 using System;
@@ -27,6 +28,7 @@ public partial class ServiceManagementViewModel : ObservableObject
     public ObservableCollection<ServiceType> ServiceTypes { get; set; } = new();
     public ObservableCollection<ServiceCategory> ServiceCategories { get; set; } = new();
     public ObservableCollection<Service> FilteredServices { get; set; } = new();
+    public ObservableCollection<TaxRate> TaxRates { get; } = new(Enum.GetValues(typeof(TaxRate)).Cast<TaxRate>());
 
     private Service? _selectedService;
     public Service? SelectedService
@@ -34,6 +36,7 @@ public partial class ServiceManagementViewModel : ObservableObject
         get => _selectedService;
         set
         {
+
             SetProperty(ref _selectedService, value);
             EditCommand.NotifyCanExecuteChanged(); // <- manuell ergänzen
         }
@@ -118,7 +121,7 @@ public partial class ServiceManagementViewModel : ObservableObject
             Description = service.Description,
             Unit = service.Unit,
             PriceNet = service.PriceNet,
-            TaxRate = service.TaxRate,
+            TaxRateEnum = service.TaxRateEnum,
             ServiceTypeId = service.ServiceTypeId,
             ServiceCategoryId = service.ServiceCategoryId,
             IsActive = service.IsActive
@@ -131,13 +134,11 @@ public partial class ServiceManagementViewModel : ObservableObject
     {
         return service != null;
     }
-
     private async void LoadData()
     {
         await ReloadServicesAsync();
         await ReloadTypesAndCategoriesAsync();
     }
-
     private async Task ReloadServicesAsync()
     {
         Services.Clear();
@@ -148,7 +149,6 @@ public partial class ServiceManagementViewModel : ObservableObject
         }
         ApplyFilter();
     }
-
     private async Task ReloadTypesAndCategoriesAsync()
     {
         ServiceTypes.Clear();
@@ -166,7 +166,6 @@ public partial class ServiceManagementViewModel : ObservableObject
             ServiceCategories.Add(category);
         }
     }
-
     private async Task<string> GenerateArticleNumberAsync(int serviceTypeId, int serviceCategoryId)
     {
         var type = await _db.ServiceTypes.FindAsync(serviceTypeId);
@@ -195,7 +194,6 @@ public partial class ServiceManagementViewModel : ObservableObject
     partial void OnSearchTextChanged(string? value) => ApplyFilter();
     partial void OnSelectedTypeIdChanged(int? value) => ApplyFilter();
     partial void OnSelectedCategoryIdChanged(int? value) => ApplyFilter();
-
     private void ApplyFilter()
     {
         var filtered = Services.Where(s =>

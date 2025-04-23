@@ -14,10 +14,17 @@
             <MenuItem Header="_Datei">
                 <MenuItem Header="Beenden" Click="Exit_Click"/>
             </MenuItem>
-            <MenuItem Header="_Ansichten">
+            <MenuItem Header="_Kunden">
                 <MenuItem Header="Kunden" Click="OpenCustomerView_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Leistungen">
                 <MenuItem Header="Leistungen" Click="OpenServiceView_Click"/>
             </MenuItem>
+            <MenuItem Header="_Rechnungen">
+            <MenuItem Header="Rechnungen" Click="OpenAllInvoicesView_Click"/>
+            <MenuItem Header="Neue Rechnung" Click="OpenInvoiceView_Click"/>
+            </MenuItem>
+
         </Menu>
         <avalonDock:DockingManager x:Name="DockManager">
             <avalonDock:LayoutRoot>
@@ -27,5 +34,5 @@
             </avalonDock:LayoutRoot>
         </avalonDock:DockingManager>
     </DockPanel>
-    
+
 </Window>

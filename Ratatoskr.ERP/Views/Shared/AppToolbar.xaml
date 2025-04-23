@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="Ratatoskr.App.Views.Shared.AppToolbar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Ratatoskr.App.Views.Shared"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <ToolBar>
+            <!--Drucken-->
+        <Button ToolTip="Drucken"
+                Command="{Binding PrintCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Visibility="{Binding ShowPrintButton, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <materialDesign:PackIcon Kind="Printer"/>
+        </Button>
+
+        <!-- Kopie -->
+        <Button ToolTip="Kopie drucken"
+                Command="{Binding PrintCopyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Visibility="{Binding ShowPrintCopyButton, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <materialDesign:PackIcon Kind="ContentCopy" />
+        </Button>
+
+        <!-- Bezahlt -->
+        <Button ToolTip="Als bezahlt markieren"
+                Command="{Binding MarkAsPaidCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Visibility="{Binding ShowMarkAsPaidButton, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <materialDesign:PackIcon Kind="CheckBold" />
+        </Button>
+
+        <!-- Stornieren -->
+        <Button ToolTip="Stornieren"
+                Command="{Binding CancelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Visibility="{Binding ShowCancelButton, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <materialDesign:PackIcon Kind="Cancel" />
+        </Button>
+    </ToolBar>
+</UserControl>

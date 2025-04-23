@@ -3,8 +3,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Ratatoskr.App.ViewModels.Customers;
+using Ratatoskr.App.ViewModels.Invoices;
 using Ratatoskr.App.ViewModels.Services;
 using Ratatoskr.App.Views.Customers;
+using Ratatoskr.App.Views.Invoices;
 using Ratatoskr.App.Views.Services;
 using Ratatoskr.Infrastructure.Database;
 using Ratatoskr.Infrastructure.Services;
@@ -45,6 +47,12 @@ public partial class App : Application
 
                 services.AddTransient<ServiceManagementView>();
                 services.AddTransient<ServiceManagementViewModel>();
+
+                services.AddTransient<NewInvoiceView>();
+                services.AddTransient<NewInvoiceViewModel>();
+
+                services.AddTransient<InvoicesView>();
+                services.AddTransient<InvoicesViewModel>();
             })
             .Build();
     }

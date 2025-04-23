@@ -14,6 +14,9 @@ public class AppDbContext : DbContext
     public DbSet<Service> Services => Set<Service>();
     public DbSet<ServiceType> ServiceTypes => Set<ServiceType>();
     public DbSet<ServiceCategory> ServiceCategories => Set<ServiceCategory>();
+    public DbSet<Invoice> Invoices => Set<Invoice>();
+    public DbSet<InvoiceItem> InvoiceItems => Set<InvoiceItem>();
+
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options ) 
     {
@@ -34,5 +37,11 @@ public class AppDbContext : DbContext
             new ServiceCategory { Id = 2, Code = "WT", Name = "Wartung" },
             new ServiceCategory { Id = 3, Code = "SC", Name = "Schulung" }
         );
+
+        modelBuilder.Entity<InvoiceItem>()
+            .HasOne(ii => ii.Invoice)
+            .WithMany(i => i.Items)
+            .HasForeignKey(ii => ii.InvoiceId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

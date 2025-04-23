@@ -1,17 +1,12 @@
 ﻿using AvalonDock.Layout;
+using Microsoft.EntityFrameworkCore;
 using Ratatoskr.App.Helpers;
+using Ratatoskr.App.ViewModels.Invoices;
 using Ratatoskr.App.Views.Customers;
+using Ratatoskr.App.Views.Invoices;
 using Ratatoskr.App.Views.Services;
-using System.Text;
+using Ratatoskr.Infrastructure.Database;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Ratatoskr.App
 {
@@ -22,9 +17,8 @@ namespace Ratatoskr.App
     {
         public MainWindow()
         {
+            
             InitializeComponent();
-
-            //MainContent.Content = ViewLoader.LoadView<CustomerView>();
         }
         private void OpenCustomerView_Click(object sender, RoutedEventArgs e)
         {
@@ -71,6 +65,54 @@ namespace Ratatoskr.App
             {
                 Title = "Leistungen",
                 Content = serviceView
+            };
+
+            MainDocumentPane.Children.Add(document);
+            document.IsActive = true;
+        }
+        private void OpenInvoiceView_Click(object sender, RoutedEventArgs e)
+        {
+            // 🔍 Bereits geöffnet?
+            var existingDoc = MainDocumentPane.Children
+                .OfType<LayoutDocument>()
+                .FirstOrDefault(d => d.Title == "Neue Rechnung");
+
+            if (existingDoc is not null)
+            {
+                existingDoc.IsActive = true;
+                return;
+            }
+
+            // 📄 Neue View laden
+            var invoiceView = ViewLoader.LoadView<NewInvoiceView>();
+            var document = new LayoutDocument
+            {
+                Title = "Neue Rechnung",
+                Content = invoiceView
+            };
+
+            MainDocumentPane.Children.Add(document);
+            document.IsActive = true;
+        }
+        private void OpenAllInvoicesView_Click(object sender, RoutedEventArgs e)
+        {
+            // 🔍 Bereits geöffnet?
+            var existingDoc = MainDocumentPane.Children
+                .OfType<LayoutDocument>()
+                .FirstOrDefault(d => d.Title == "Rechnungen");
+
+            if (existingDoc is not null)
+            {
+                existingDoc.IsActive = true;
+                return;
+            }
+
+            // 📄 Neue View laden
+            var invoiceView = ViewLoader.LoadView<InvoicesView>();
+            var document = new LayoutDocument
+            {
+                Title = "Rechnungen anzeigen",
+                Content = invoiceView
             };
 
             MainDocumentPane.Children.Add(document);

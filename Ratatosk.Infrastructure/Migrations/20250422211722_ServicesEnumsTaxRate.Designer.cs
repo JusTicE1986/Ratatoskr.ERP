@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ratatoskr.Infrastructure.Database;
 
@@ -10,9 +11,11 @@ using Ratatoskr.Infrastructure.Database;
 namespace Ratatoskr.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250422211722_ServicesEnumsTaxRate")]
+    partial class ServicesEnumsTaxRate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
@@ -89,15 +92,6 @@ namespace Ratatoskr.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("TotalGross")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("TotalNet")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("TotalVat")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
@@ -171,8 +165,9 @@ namespace Ratatoskr.Infrastructure.Migrations
                     b.Property<int>("TaxRateEnum")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Unit")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 

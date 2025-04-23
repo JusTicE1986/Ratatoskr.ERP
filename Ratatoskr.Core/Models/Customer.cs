@@ -11,6 +11,7 @@ public class Customer
     public int Id { get; set; } // Primary Key
     public string Prename { get; set; } = string.Empty;
     public string Surname { get; set; } = string.Empty;
+    public string FullName => $"{Prename} {Surname}";
     public string Email { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;

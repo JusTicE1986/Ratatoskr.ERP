@@ -1,5 +1,9 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Ratatoskr.Core.Enums;
+using Ratatoskr.Core.Helpers;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,9 +18,9 @@ public class Service
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
 
-    public string Unit { get; set; } = "Stück";
+    public Unit Unit { get; set; }
     public decimal PriceNet { get; set; }
-    public int TaxRate { get; set; }
+    public TaxRate TaxRateEnum { get; set; }
 
     public bool IsActive { get; set; } = true;
 
@@ -25,4 +29,7 @@ public class Service
 
     public int ServiceCategoryId { get; set; }
     public ServiceCategory? ServiceCategory { get; set; }
+
+    [NotMapped]
+    public decimal TaxRate => TaxRateEnum.ToDecimal();
 }
