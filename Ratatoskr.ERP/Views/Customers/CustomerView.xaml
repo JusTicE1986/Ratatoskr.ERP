@@ -6,81 +6,210 @@
              xmlns:vm="clr-namespace:Ratatoskr.App.ViewModels.Customers"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d">
-
     <Grid Margin="20">
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <!--Eingabefelder-->
-        <ToolBar Grid.Row="0" Padding="5">
+        <!--Suchleiste-->
+        <ToolBar Grid.Row="0" >
+            <StackPanel Orientation="Horizontal" Margin="0 10 0 10">
+                <TextBlock Text="Nach Name oder Firma suchen:" Margin="10 0 10 0"/>
+                <TextBox Width="200" Margin="0 0 10 0"
+         Text="{Binding DisplayNameFilter, UpdateSourceTrigger=PropertyChanged}"
+         materialDesign:HintAssist.Hint="Name / Firma"/>
+
+                <Button Command="{Binding ResetFiltersCommand}"
+        Margin="10 0 0 0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="CloseCircleOutline" Width="16" Height="16"/>
+                        <TextBlock Text="Filter zurücksetzen" Margin="5 0 5 0"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </ToolBar>
+        <!--Toolbar-->
+        <ToolBar Grid.Row="1" Padding="5">
             <Button 
-                    Command="{Binding ShowNewCustomerFormCommand}"
-                    Margin="0 0 10 0">
+            Command="{Binding CreateNewCustomerCommand}"
+            Margin="0 0 10 0">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <materialDesign:PackIcon Kind="AccountPlus" Width="16" Height="16"/>
                     <TextBlock Text="Neu" Margin="5 0 5 0"/>
                 </StackPanel>
             </Button>
             <Button Command="{Binding EditCustomerCommand}"
-                    Margin="0 0 10 0"
-                    IsEnabled="{Binding SelectedCustomer, Converter={StaticResource NullToBoolConverter}}">
+            Margin="0 0 10 0"
+            IsEnabled="{Binding SelectedCustomer, Converter={StaticResource NullToBoolConverter}}">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <materialDesign:PackIcon Kind="Pencil" Width="16" Height="16"/>
                     <TextBlock Text="Bearbeiten" Margin="5 0 5 0"/>
                 </StackPanel>
             </Button>
             <Button Command="{Binding LoadCustomersCommand}"
-                    Margin="0 0 10 0">
+            Margin="0 0 10 0">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <materialDesign:PackIcon Kind="Refresh" Width="16" Height="16"/>
                     <TextBlock Text="Aktualisieren" Margin="5 0 5 0"/>
                 </StackPanel>
             </Button>
             <Button Command="{Binding DeleteCustomerCommand}"
-                    Margin="0 0 10 0"
-                    IsEnabled="{Binding SelectedCustomer, Converter={StaticResource NullToBoolConverter}}">
+            Margin="0 0 10 0"
+            IsEnabled="{Binding SelectedCustomer, Converter={StaticResource NullToBoolConverter}}">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <materialDesign:PackIcon Kind="Delete" Width="16" Height="16"/>
                     <TextBlock Text="Löschen" Margin="5 0 5 0"/>
                 </StackPanel>
             </Button>
-        </ToolBar>
-        <!--Filter-->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0 10 0 10">
-            <TextBox Width="200" Margin="0 0 10 0"
-                     Text="{Binding NameFilter, UpdateSourceTrigger=PropertyChanged}"
-                     materialDesign:HintAssist.Hint="Name"/>
-            <TextBox Width="200" Margin="0 0 10 0"
-                     Text="{Binding CompanyFilter, UpdateSourceTrigger=PropertyChanged}"
-                     materialDesign:HintAssist.Hint="Firma"/>
-            <Button Command="{Binding ResetFiltersCommand}"
-                    Margin="10 0 0 0">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="CloseCircleOutline" Width="16" Height="16"/>
-                    <TextBlock Text="Filter zurücksetzen" Margin="5 0 5 0"/>
+            <Button Command="{Binding ToggleDetailsCommand}"
+IsEnabled="{Binding SelectedCustomer, Converter={StaticResource NullToBoolConverter}}"
+Margin="0 0 10 0">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Width="16" Height="16"
+                                     Kind="{Binding IsDetailVisible, Converter={StaticResource BoolToIconConverter}}"/>
+                    <TextBlock Text="{Binding IsDetailVisible, Converter={StaticResource BoolToTextConverter }}" Margin="5 0 5 0"/>
                 </StackPanel>
             </Button>
-        </StackPanel>
-        
-        <!--Kundenliste-->
-        <DataGrid Grid.Row="2"
+        </ToolBar>
+        <ScrollViewer Grid.Row="2"    VerticalScrollBarVisibility="Auto">
+
+            <!--Kundenliste und Detailbereich-->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="500"/>
+                </Grid.ColumnDefinitions>
+                <DataGrid
+                    Grid.Column="0"
                   ItemsSource="{Binding Customers}"
                   SelectedItem="{Binding SelectedCustomer, Mode=TwoWay}"
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
                   Margin=" 0 0 0 10"
                   CanUserAddRows="False"
-                  SelectionMode="Single">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="50"/>
-                <DataGridTextColumn Header="Name" Binding="{Binding FullName}" Width="*"/>
-                <DataGridTextColumn Header="Firma" Binding="{Binding CompanyName}" Width="*"/>
-                <DataGridCheckBoxColumn Header="Firmenkunde" Binding="{Binding IsCompany}" Width="100"/>
+                  SelectionMode="Single"
+                    MaxHeight="550"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Kundennummer" Binding="{Binding CustomerNumber}" Width="50"/>
+                        <DataGridTextColumn Header="Name" Binding="{Binding DisplayName}" Width="*"/>
+                        <DataGridTextColumn Header="Adresse" Binding="{Binding Address}" Width="*"/>
+                        <DataGridTextColumn Header="Ort" Binding="{Binding City}" Width="150"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <Grid Margin="0 20 0 0" Grid.Column="1">
 
-            </DataGrid.Columns>
-            
-        </DataGrid>
+                    <materialDesign:Card Visibility="{Binding IsDetailVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                 Padding="20" Margin="0 10 0 0">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock Text="{Binding FormTitle}" FontSize="18" FontWeight="Bold" Margin="0 0 10 0"/>
+
+                                <!--Firmenkunde-->
+                                <StackPanel Orientation="Horizontal" Margin="0 5">
+                                    <CheckBox Content="Firmenkunde"
+                          IsChecked="{Binding CurrentCustomerForm.IsCompany}"
+                          IsEnabled="{Binding IsInputDisabled, Converter={StaticResource InverseBooleanConverter}}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Vertical" Margin="0 0 0 10">
+                                    <TextBlock Text="Firma"
+                                       Visibility="{Binding CurrentCustomerForm.IsCompany, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    <TextBox Width="200" Margin="0 0 10 0" HorizontalAlignment="Left"
+                                     materialDesign:HintAssist.Hint="Firma"
+                                     Text="{Binding CurrentCustomerForm.CompanyName, Mode=TwoWay}"
+                                     IsReadOnly="{Binding IsInputDisabled}"
+                                     Visibility="{Binding CurrentCustomerForm.IsCompany, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0 5">
+                                    <StackPanel Orientation="Vertical" Margin="0 0 0 10">
+                                        <TextBlock Text="Vorname"/>
+                                        <TextBox Width="200" Margin="0 0 10 0"
+                                 materialDesign:HintAssist.Hint="Vorname"
+                                 Text="{Binding CurrentCustomerForm.Prename, Mode=TwoWay}"
+                                 IsReadOnly="{Binding IsInputDisabled}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Vertical" Margin="0 0 0 10">
+                                        <TextBlock Text="Nachname"/>
+                                        <TextBox Width="200" Margin="0 0 10 0"
+                                 materialDesign:HintAssist.Hint="Nachname"
+                                 Text="{Binding CurrentCustomerForm.Surname, Mode=TwoWay}"
+                                 IsReadOnly="{Binding IsInputDisabled}"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!--Adresse-->
+                                <StackPanel Orientation="Vertical" Margin="0 0 10 0">
+                                    <TextBlock Text="Adresse"/>
+                                    <TextBox Width="200" Margin="0 0 10 0" HorizontalAlignment="Left"
+                             materialDesign:HintAssist.Hint="Straße"
+                             Text="{Binding CurrentCustomerForm.Address, Mode=TwoWay}"
+                             IsReadOnly="{Binding IsInputDisabled}"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0 0 10 0">
+                                        <StackPanel Orientation="Vertical" Margin="0 0 0 10">
+                                            <TextBlock Text="PLZ"/>
+                                            <TextBox Width="200"
+                                 Margin="0 0 10 0"
+                                 materialDesign:HintAssist.Hint="PLZ"
+                                 Text="{Binding CurrentCustomerForm.ZipCode, Mode=TwoWay}"
+                                 IsReadOnly="{Binding IsInputDisabled}"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Vertical" Margin="0 0 0 10">
+                                            <TextBlock Text="Ort"/>
+                                            <TextBox Width="200"                            Margin="0 0 10 0"
+                                 materialDesign:HintAssist.Hint="Ort"
+                                 Text="{Binding CurrentCustomerForm.City, Mode=TwoWay}"
+                                 IsReadOnly="{Binding IsInputDisabled}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Vertical" Margin="0 0 0 10">
+                                        <TextBlock Text="Land"/>
+                                        <TextBox Width="200" HorizontalAlignment="Left"
+                                Margin="0 0 10 0" 
+                             materialDesign:HintAssist.Hint="Land"
+                             Text="{Binding CurrentCustomerForm.Country, Mode=TwoWay}"
+                             IsReadOnly="{Binding IsInputDisabled}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <!--Kontakt-->
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Vertical" Margin="0 0 0 10">
+                                        <TextBlock Text="Email:"/>
+                                        <TextBox 
+                                Width="200"  Margin="0 0 10 0" HorizontalAlignment="Left"
+                             materialDesign:HintAssist.Hint="Email"
+                             Text="{Binding CurrentCustomerForm.Email, Mode=TwoWay}"
+                             IsReadOnly="{Binding IsInputDisabled}"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Vertical" Margin="0 0 0 10">
+                                        <TextBlock Text="Telefon"/>
+                                        <TextBox Width="200"
+                                Margin="0 0 10 0"
+                             materialDesign:HintAssist.Hint="Telefon"
+                             Text="{Binding CurrentCustomerForm.Phone, Mode=TwoWay}"
+                             IsReadOnly="{Binding IsInputDisabled}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal"
+                                Margin="0 10 0 0"
+                                Visibility="{Binding IsInputDisabled, Converter={StaticResource InverseBooleanConverter}}">
+                                    <Button Content="💾 Speichern"
+                                Command="{Binding SaveCustomerCommand}"
+                                Margin="0 0 10 0"/>
+                                    <Button Content="❌ Abbrechen"
+                                Command="{Binding CancelCommand}"/>
+                                </StackPanel>
+
+                            </StackPanel>
+                        </ScrollViewer>
+
+                    </materialDesign:Card>
+
+                </Grid>
+                
+            </Grid>
+        </ScrollViewer>
     </Grid>
 </UserControl>

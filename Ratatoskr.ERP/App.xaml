@@ -6,10 +6,13 @@
     <Application.Resources>
         <ResourceDictionary>
             <conv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <conv:BoolToTextConverter x:Key="BoolToTextConverter"/>
+            <conv:BoolToIconConverter x:Key="BoolToIconConverter"/>
             <conv:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
             <conv:NullToBoolConverter x:Key="NullToBoolConverter"/>
             <conv:UnitToDisplayConverter x:Key="UnitToDisplayConverter"/>
             <conv:IsPastDateConverter x:Key="IsPastDateConverter"/>
+            <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
 
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />

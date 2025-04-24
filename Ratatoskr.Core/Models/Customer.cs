@@ -1,4 +1,6 @@
-﻿namespace Ratatoskr.Core.Models;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Ratatoskr.Core.Models;
 
 public class Customer
 {
@@ -28,7 +30,10 @@ public class Customer
     public bool IsActive { get; set; } = true;
 
     // 📘 Für Anzeigezwecke
-    public string FullName => IsCompany
+    public string DisplayName => IsCompany
         ? CompanyName ?? "Unbenannte Firma"
         : $"{Prename} {Surname}";
+
+    [NotMapped]
+    public string CustomerNumber => $"K{Id:D4}";
 }

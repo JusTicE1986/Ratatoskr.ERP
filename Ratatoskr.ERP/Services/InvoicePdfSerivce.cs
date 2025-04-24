@@ -44,7 +44,7 @@ public class InvoicePdfSerivce
         {
             col.Spacing(10);
             //Kundenname
-            col.Item().Text($"Kunde: {invoice.Customer.FullName}");
+            col.Item().Text($"Kunde: {invoice.Customer.DisplayName}");
 
             //Rechnungsdatum
             col.Item().Text($"Datum: {invoice.InvoiceDate:dd.MM.yyyy}");
