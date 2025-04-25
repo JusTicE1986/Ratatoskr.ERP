@@ -21,160 +21,180 @@ public partial class ServiceManagementViewModel : ObservableObject
     public ServiceManagementViewModel(AppDbContext db)
     {
         _db = db;
-        LoadData();
+        LoadDataAsync();
     }
 
-    public ObservableCollection<Service> Services { get; set; } = new();
-    public ObservableCollection<ServiceType> ServiceTypes { get; set; } = new();
-    public ObservableCollection<ServiceCategory> ServiceCategories { get; set; } = new();
-    public ObservableCollection<Service> FilteredServices { get; set; } = new();
-    public ObservableCollection<TaxRate> TaxRates { get; } = new(Enum.GetValues(typeof(TaxRate)).Cast<TaxRate>());
-
-    private Service? _selectedService;
-    public Service? SelectedService
-    {
-        get => _selectedService;
-        set
-        {
-
-            SetProperty(ref _selectedService, value);
-            EditCommand.NotifyCanExecuteChanged(); // <- manuell ergänzen
-        }
-    }
+    private ObservableCollection<Service> _allServices = new();
 
     [ObservableProperty]
-    private bool isInEditMode = false;
+    private ObservableCollection<Service> services = new();
+
+    [ObservableProperty]
+    private Service? selectedService;
+
     [ObservableProperty]
     private string? searchText;
+
     [ObservableProperty]
-    private int? selectedTypeId;
+    private ObservableCollection<ServiceType> serviceTypes = new(Enum.GetValues(typeof(ServiceType)).Cast<ServiceType>());
     [ObservableProperty]
-    private int? selectedCategoryId;
+    private ObservableCollection<TaxRate> taxRates = new(Enum.GetValues(typeof(TaxRate)).Cast<TaxRate>());
+
+    #region Formular & Detailbereich
+
+    [ObservableProperty]
+    private Service? currentServiceForm;
+    [ObservableProperty]
+    private bool isDetailVisible;
+    [ObservableProperty]
+    private bool isInEditMode;
+
+    partial void OnIsInEditModeChanged(bool oldValue, bool newValue)
+    {
+        OnPropertyChanged(nameof(IsInputDisabled));
+        OnPropertyChanged(nameof(FormTitle));
+    }
+
+    [ObservableProperty]
+    private bool isInCreateMode;
+    partial void OnIsInCreateModeChanged(bool oldValue, bool newValue)
+    {
+        OnPropertyChanged(nameof(IsInputDisabled));
+        OnPropertyChanged(nameof(FormTitle));
+    }
+
+    public string FormTitle => IsInEditMode ? "Leistung bearbeiten" : IsInCreateMode ? "Neue Leistung" : "Details anzeigen";
+    public bool IsInputDisabled => !(IsInEditMode || IsInCreateMode);
+    #endregion
 
     [RelayCommand]
-    private void New()
+    private async Task LoadDataAsync()
     {
-        SelectedService = new Service();
-        IsInEditMode = false;
-    }
-    [RelayCommand]
-    private async Task SaveAsync()
-    {
-        if (SelectedService is null) return;
-
-        var duplicate = await _db.Services.AnyAsync(s =>
-        s.Name.ToLower() == SelectedService.Name.ToLower() &&
-        s.ServiceTypeId == SelectedService.ServiceTypeId &&
-        s.ServiceCategoryId == SelectedService.ServiceCategoryId &&
-        (!IsInEditMode || s.Id != SelectedService.Id));
-
-        if (duplicate)
-        {
-            var type = ServiceTypes.FirstOrDefault(t => t.Id == SelectedService.ServiceTypeId)?.Name ?? "Unbekannt";
-            var category = ServiceCategories.FirstOrDefault(c => c.Id == SelectedService.ServiceCategoryId)?.Name ?? "Unbekannt";
-
-            string msg = $"Die Leistung \"{SelectedService.Name}\" existiert bereits " +
-                $"in der Kombination: \n\n" +
-                $"Typ: {type}\n" +
-                $"Kategorie: {category}";
-
-            MessageBox.Show(msg, "Doppelter Eintrag", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
-        }
-
-        if (!IsInEditMode)
-        {
-            SelectedService.ArticleNumber = await GenerateArticleNumberAsync(
-                SelectedService.ServiceTypeId,
-                SelectedService.ServiceCategoryId
-                );
-            await _db.Services.AddAsync(SelectedService);
-        }
-        else
-        {
-            _db.Services.Update(SelectedService);
-        }
-
-        await _db.SaveChangesAsync();
-        await ReloadServicesAsync();
-        SelectedService = new();
-        IsInEditMode = false;
-    }
-    [RelayCommand]
-    private async Task DeleteAsync(Service? service)
-    {
-        if (service is null) return;
-
-        _db.Services.Remove(service);
-        await _db.SaveChangesAsync();
-        await ReloadServicesAsync();
-    }
-    [RelayCommand]
-    private void Edit(Service? service)
-    {
-        if (service == null) return;
-        SelectedService = new Service
-        {
-            Id = service.Id,
-            ArticleNumber = service.ArticleNumber,
-            Name = service.Name,
-            Description = service.Description,
-            Unit = service.Unit,
-            PriceNet = service.PriceNet,
-            TaxRateEnum = service.TaxRateEnum,
-            ServiceTypeId = service.ServiceTypeId,
-            ServiceCategoryId = service.ServiceCategoryId,
-            IsActive = service.IsActive
-        };
-
-        IsInEditMode = true;
-    }
-
-    private bool CanEdit(Service? service)
-    {
-        return service != null;
-    }
-    private async void LoadData()
-    {
-        await ReloadServicesAsync();
-        await ReloadTypesAndCategoriesAsync();
-    }
-    private async Task ReloadServicesAsync()
-    {
-        Services.Clear();
-        var list = await _db.Services.Include(s => s.ServiceType).Include(s => s.ServiceCategory).ToListAsync();
-        foreach (var item in list)
-        {
-            Services.Add(item);
-        }
+        var list = await _db.Services.ToListAsync();
+        _allServices = new ObservableCollection<Service>(list);
         ApplyFilter();
     }
-    private async Task ReloadTypesAndCategoriesAsync()
+    partial void OnSearchTextChanged(string? oldValue, string? newValue) => ApplyFilter();
+
+    [RelayCommand]
+    private void ApplyFilter()
     {
-        ServiceTypes.Clear();
-        ServiceCategories.Clear();
+        var filtered = _allServices.Where(s =>
+        string.IsNullOrWhiteSpace(SearchText) ||
+        s.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
+        s.Description.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true ||
+        s.ArticleNumber.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
 
-        var types = await _db.ServiceTypes.ToListAsync();
-        foreach (var type in types)
-        {
-            ServiceTypes.Add(type);
-        }
-
-        var categories = await _db.ServiceCategories.ToListAsync();
-        foreach (var category in categories)
-        {
-            ServiceCategories.Add(category);
-        }
+        Services = new ObservableCollection<Service>(filtered);
     }
-    private async Task<string> GenerateArticleNumberAsync(int serviceTypeId, int serviceCategoryId)
+    [RelayCommand]
+    private void ResetFilters()
     {
-        var type = await _db.ServiceTypes.FindAsync(serviceTypeId);
-        var category = await _db.ServiceCategories.FindAsync(serviceCategoryId);
+        SearchText = null;
+        ApplyFilter();
+    }
 
-        if (type is null || category is null) return "INVALID-REF";
+    [RelayCommand]
+    private void CreateNewService()
+    {
+        CurrentServiceForm = new Service();
+        IsInCreateMode = true;
+        IsInEditMode = false;
+        IsDetailVisible = true;
+    }
 
-        var existing = await _db.Services
-            .Where(s => s.ServiceTypeId == serviceTypeId && s.ServiceCategoryId == serviceCategoryId)
+    [RelayCommand]
+    private void EditService()
+    {
+        if (SelectedService == null) return;
+
+        CurrentServiceForm = new Service
+        {
+            Id = SelectedService.Id,
+            ArticleNumber = SelectedService.ArticleNumber,
+            Name = SelectedService.Name,
+            Description = SelectedService.Description,
+            Unit = SelectedService.Unit,
+            PriceNet = SelectedService.PriceNet,
+            TaxRateEnum = SelectedService.TaxRateEnum,
+            ServiceTypeId = SelectedService.ServiceTypeId,
+            IsActive = SelectedService.IsActive
+        };
+
+        IsInCreateMode = false;
+        IsInEditMode = true;
+        IsDetailVisible = true;
+        
+    }
+
+    [RelayCommand]
+    private async Task DeleteServiceAsync()
+    {
+        if (SelectedService is null) return;
+        _db.Services.Remove(SelectedService);
+        await _db.SaveChangesAsync();
+        await LoadDataAsync();
+    }
+
+    [RelayCommand]
+    private void ToggleDetails()
+    {
+        if (SelectedService == null) return;
+        CurrentServiceForm = SelectedService;
+        IsDetailVisible = !IsDetailVisible;
+        IsInCreateMode = false;
+        IsInEditMode = false;
+    }
+
+    [RelayCommand]
+    private async Task SaveServiceAsync()
+    {
+        if (CurrentServiceForm is null) return;
+        if (IsInCreateMode)
+        {
+            CurrentServiceForm.ArticleNumber = await GenerateArticleNumberAsync(CurrentServiceForm.ServiceTypeId);
+            await _db.Services.AddAsync(CurrentServiceForm);
+        }
+        else if (IsInEditMode)
+        {
+            var local = _db.Services.Local.FirstOrDefault(s => s.Id == CurrentServiceForm.Id);
+            if (local is not null) _db.Entry(local).State = EntityState.Detached;
+            _db.Entry(CurrentServiceForm).State = EntityState.Modified;
+        }
+
+        await _db.SaveChangesAsync();
+        await LoadDataAsync();
+        ResetForm();
+    }
+
+    [RelayCommand]
+    private void Cancel()
+    {
+        ResetForm();
+    }
+
+    private void ResetForm()
+    {
+        IsInEditMode = false;
+        IsInCreateMode = false;
+        IsDetailVisible = false;
+        CurrentServiceForm = null;
+        OnPropertyChanged(nameof(IsInputDisabled));
+        OnPropertyChanged(nameof(FormTitle));
+    }
+
+    private async Task<string> GenerateArticleNumberAsync(int typeId)
+    {
+        var typePrefix = typeId switch
+        {
+            0 => "PRD",
+            1 => "DL",
+            2 => "SON",
+            _ => "UNK"
+        };
+
+        var existingNumbers = await _db.Services
+            .Where(s => s.ServiceTypeId == typeId)
             .Select(s => s.ArticleNumber)
             .ToListAsync();
 
@@ -183,35 +203,12 @@ public partial class ServiceManagementViewModel : ObservableObject
 
         do
         {
-            generated = $"{type.Code}-{category.Code}-{index:000}";
+            generated = $"{typePrefix}-{index:000}";
             index++;
         }
-        while (existing.Contains(generated));
+        while (existingNumbers.Contains(generated));
 
         return generated;
-    }
-
-    partial void OnSearchTextChanged(string? value) => ApplyFilter();
-    partial void OnSelectedTypeIdChanged(int? value) => ApplyFilter();
-    partial void OnSelectedCategoryIdChanged(int? value) => ApplyFilter();
-    private void ApplyFilter()
-    {
-        var filtered = Services.Where(s =>
-        (string.IsNullOrWhiteSpace(SearchText) ||
-        s.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
-        s.Description?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true ||
-        s.ArticleNumber?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true)
-        &&
-        (!SelectedTypeId.HasValue || s.ServiceTypeId == SelectedTypeId)
-        &&
-        (!SelectedCategoryId.HasValue || s.ServiceCategoryId == SelectedCategoryId)
-        );
-
-        FilteredServices.Clear();
-        foreach (var s in filtered)
-        {
-            FilteredServices.Add(s);
-        }
     }
 }
 

@@ -169,7 +169,7 @@ namespace Ratatoskr.Infrastructure.Migrations
                     b.Property<decimal>("PriceNet")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ServiceCategoryId")
+                    b.Property<int?>("ServiceType")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ServiceTypeId")
@@ -183,89 +183,7 @@ namespace Ratatoskr.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ServiceCategoryId");
-
-                    b.HasIndex("ServiceTypeId");
-
                     b.ToTable("Services");
-                });
-
-            modelBuilder.Entity("Ratatoskr.Core.Models.ServiceCategory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ServiceCategories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Code = "BE",
-                            Name = "Beratung"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "WT",
-                            Name = "Wartung"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = "SC",
-                            Name = "Schulung"
-                        });
-                });
-
-            modelBuilder.Entity("Ratatoskr.Core.Models.ServiceType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ServiceTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Code = "DL",
-                            Name = "Dienstleistung"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "PR",
-                            Name = "Produkt"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = "MI",
-                            Name = "Miete"
-                        });
                 });
 
             modelBuilder.Entity("Ratatoskr.Core.Models.Invoice", b =>
@@ -294,25 +212,6 @@ namespace Ratatoskr.Infrastructure.Migrations
                     b.Navigation("Invoice");
 
                     b.Navigation("Service");
-                });
-
-            modelBuilder.Entity("Ratatoskr.Core.Models.Service", b =>
-                {
-                    b.HasOne("Ratatoskr.Core.Models.ServiceCategory", "ServiceCategory")
-                        .WithMany()
-                        .HasForeignKey("ServiceCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Ratatoskr.Core.Models.ServiceType", "ServiceType")
-                        .WithMany()
-                        .HasForeignKey("ServiceTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ServiceCategory");
-
-                    b.Navigation("ServiceType");
                 });
 
             modelBuilder.Entity("Ratatoskr.Core.Models.Invoice", b =>
