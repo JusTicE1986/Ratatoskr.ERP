@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ratatoskr.Infrastructure.Database;
 
@@ -10,9 +11,11 @@ using Ratatoskr.Infrastructure.Database;
 namespace Ratatoskr.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250422200553_InvoiceItemAddedSelectedSerivce")]
+    partial class InvoiceItemAddedSelectedSerivce
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
@@ -31,23 +34,19 @@ namespace Ratatoskr.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CompanyName")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Country")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsCompany")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Phone")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Prename")
@@ -93,15 +92,6 @@ namespace Ratatoskr.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("TotalGross")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("TotalNet")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("TotalVat")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
@@ -120,9 +110,6 @@ namespace Ratatoskr.Infrastructure.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("InvoiceId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PositionNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Quantity")
@@ -175,11 +162,12 @@ namespace Ratatoskr.Infrastructure.Migrations
                     b.Property<int>("ServiceTypeId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("TaxRateEnum")
+                    b.Property<int>("TaxRate")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Unit")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 

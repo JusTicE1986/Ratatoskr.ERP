@@ -10,13 +10,6 @@ using System.Threading.Tasks;
 
 namespace Ratatoskr.Core.Models;
 
-public enum ServiceType
-{
-    Produkt,
-    Dienstleistung,
-    Sonstiges
-}
-
 public class Service
 {
     public int Id { get; set; }
@@ -31,8 +24,11 @@ public class Service
 
     public bool IsActive { get; set; } = true;
 
-    public ServiceType? ServiceType { get; set; }
     public int ServiceTypeId { get; set; }
+    public ServiceType? ServiceType { get; set; }
+
+    public int ServiceCategoryId { get; set; }
+    public ServiceCategory? ServiceCategory { get; set; }
 
     [NotMapped]
     public decimal TaxRate => TaxRateEnum.ToDecimal();
